@@ -28,14 +28,17 @@ which has an integreated 16mm round spirit level. Frankie does not include an in
 
 Frankie operates using a main custom-written program, along with one custom-made module and two
 pre-existing ones. The GPS Parser Module, adopted unchanged from [1], reads NMEA sentences from
-the GPS via UART, and extracts the position, time, date, altitude, speed, and satellite count. The BME
-Sensor Module, taken from [2], manages the environmental sensor, providing temperature, pressure,
+the GPS via UART, and extracts the position, time, date, altitude, speed, satellite count, etc... 
+The BME Sensor Module, taken from [2], manages the environmental sensor, providing temperature, pressure,
 and humidity readings via I2C. The Celestial Calculations Module, written following Paul Schlyter’s
 explanations for computing celestial positions [3], calculates the rise and set times of the Sun, Moon,
 and planets for a given day, determines twilight periods, and computes planetary elevations using orbital
-mechanics. The output was tested against values found on Stellarium and shown very good levels of
-accuracy. The main code then integrates the three modules to display astronomical and environmental
-information for the observer’s location on an OLED screen, with automatic cycling and data logging.
+mechanics. The main code, calculates the Moon Phase and percentage of illumination and integrates the 
+three modules to display astronomical and environmental information for the observer’s location on a
+2.42" OLED screen, with automatic cycling and data logging. The output was tested against values found on 
+Stellarium and shown very good levels of accuracy. The moon phase and percentage of illumination are calculated
+from a reference point, to improve accuracy, change the reference point to the lastest full moon or new moon
+prior to your observations. You can change the range for each phase as you see fit.
 
 # Function
 
