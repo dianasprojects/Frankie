@@ -33,8 +33,8 @@ The BME Sensor Module, taken from [2], manages the environmental sensor, providi
 and humidity readings via I2C. The Celestial Calculations Module, written following Paul Schlyter’s
 explanations for computing celestial positions [3], calculates the rise and set times of the Sun, Moon,
 and planets for a given day, determines twilight periods, and computes planetary elevations using orbital
-mechanics. The main code, calculates the Moon Phase and percentage of illumination and integrates the 
-three modules to display astronomical and environmental information for the observer’s location on a
+mechanics. The main code, calculates the Moon Phase and percentage of illumination from a reference point 
+and integrates the three modules to display astronomical and environmental information for the observer’s location on a
 2.42" OLED screen, with automatic cycling and data logging. The output was tested against values found on 
 Stellarium and shown very good levels of accuracy. The moon phase and percentage of illumination are calculated
 from a reference point, to improve accuracy, change the reference point to the latest full moon or new moon
