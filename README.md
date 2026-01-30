@@ -17,6 +17,8 @@ astrophysics students, with the aim of providing experience in electronics, Micr
 
 ![Figure_1](https://i.imgur.com/l6dhpTF.jpeg)
 
+Figure 1: Schematic of Frankie.
+
 As shown in Fig.1, Frankie is composed of a Raspberry Pi Pico 2 microcontroller unit, a BME280 environmental sensor module and an OLED screen
 which communicate with the Raspberry Pi via I2C, a NEO-6M GPS module which communicates with the microcontroller via UART, two momentary push-button
 switches: one white and one black connected via GPIO, and a USB-C breakout board. The electronics are wrapped in a custom 3D-printed PETG enclosure,
