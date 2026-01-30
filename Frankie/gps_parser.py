@@ -1,3 +1,7 @@
+# Downloaded from https://core-electronics.com.au/guides/raspberry-pi-pico/how-to-add-gps-to-a-raspberry-pi-pico/
+# Find extra explanations on that website
+#----------------------------------------------
+
 # gps_parser.py - A simple library for parsing NMEA GPS data
 # For use with UART GPS modules on Raspberry Pi Pico
 
