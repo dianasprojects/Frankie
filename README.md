@@ -37,7 +37,7 @@ mechanics. The main code, calculates the Moon Phase and percentage of illuminati
 three modules to display astronomical and environmental information for the observer’s location on a
 2.42" OLED screen, with automatic cycling and data logging. The output was tested against values found on 
 Stellarium and shown very good levels of accuracy. The moon phase and percentage of illumination are calculated
-from a reference point, to improve accuracy, change the reference point to the lastest full moon or new moon
+from a reference point, to improve accuracy, change the reference point to the latest full moon or new moon
 prior to your observations. You can change the range for each phase as you see fit.
 
 # Function
