@@ -154,6 +154,8 @@ last_green = 1
 last_red = 1
 debounce = 0.05
 
+white_press_start = None
+
 # Logging state variables
 logging_active = False
 last_log_time = 0
@@ -323,43 +325,53 @@ def update_sun_times(gps_data):
         
         twilight_times = planet_calc.calculate_twilight_times(day, month, year)
         
-        if twilight_times['astronomical_dawn']['status'] == 'normal':
-            astro_begin = twilight_times['astronomical_dawn']['rise']
-            astro_end = twilight_times['astronomical_dawn']['set']
-            naut_begin = twilight_times['nautical_dawn']['rise']
-            naut_end = twilight_times['nautical_dawn']['set']
-            civil_begin = twilight_times['civil_dawn']['rise']
-            civil_end = twilight_times['civil_dawn']['set']
-            sunrise_time = twilight_times['sunrise']['rise']
-            sunset_time = twilight_times['sunrise']['set']
-            
-            sun_rise = sunrise_time
-            sun_set = sunset_time
-            
-            civil_dawn = "{}-{}".format(civil_begin, sunrise_time)
-            civil_dusk = "{}-{}".format(sunset_time, civil_end)
-            
-            nautical_dawn = "{}-{}".format(naut_begin, civil_begin)
-            nautical_dusk = "{}-{}".format(civil_end, naut_end)
-            
-            astro_dawn = "{}-{}".format(astro_begin, naut_begin)
-            astro_dusk = "{}-{}".format(naut_end, astro_end)
-            
+        # Sunrise / sunset
+        if twilight_times['sunrise']['status'] == 'normal':
+            sun_rise = twilight_times['sunrise']['rise']
+            sun_set = twilight_times['sunrise']['set']
         else:
             sun_rise = "---"
             sun_set = "---"
+        
+        # Civil twilight
+        if twilight_times['civil_dawn']['status'] == 'normal':
+            civil_begin = twilight_times['civil_dawn']['rise']
+            civil_end = twilight_times['civil_dawn']['set']
+            civil_dawn = "{}-{}".format(civil_begin, sun_rise)
+            civil_dusk = "{}-{}".format(sun_set, civil_end)
+        else:
             civil_dawn = "---"
             civil_dusk = "---"
+        
+        # Nautical twilight
+        if twilight_times['nautical_dawn']['status'] == 'normal':
+            naut_begin = twilight_times['nautical_dawn']['rise']
+            naut_end = twilight_times['nautical_dawn']['set']
+            civil_begin = twilight_times['civil_dawn']['rise'] if twilight_times['civil_dawn']['status'] == 'normal' else "---"
+            civil_end = twilight_times['civil_dawn']['set'] if twilight_times['civil_dawn']['status'] == 'normal' else "---"
+            nautical_dawn = "{}-{}".format(naut_begin, civil_begin)
+            nautical_dusk = "{}-{}".format(civil_end, naut_end)
+        else:
             nautical_dawn = "---"
             nautical_dusk = "---"
+        
+        # Astronomical twilight
+        if twilight_times['astronomical_dawn']['status'] == 'normal':
+            astro_begin = twilight_times['astronomical_dawn']['rise']
+            astro_end = twilight_times['astronomical_dawn']['set']
+            naut_begin = twilight_times['nautical_dawn']['rise'] if twilight_times['nautical_dawn']['status'] == 'normal' else "---"
+            naut_end = twilight_times['nautical_dawn']['set'] if twilight_times['nautical_dawn']['status'] == 'normal' else "---"
+            astro_dawn = "{}-{}".format(astro_begin, naut_begin)
+            astro_dusk = "{}-{}".format(naut_end, astro_end)
+        else:
             astro_dawn = "---"
             astro_dusk = "---"
         
         last_sun_calc_date = gps_data.date
         
-        
     except Exception as e:
-        print("Error calculating sun times:", e)
+        print("Error calculating sun times:", e)  
+
 
 def update_moon_times(gps_data):
     global moon_rise, moon_set, last_moon_calc_date, planet_calc
@@ -1040,31 +1052,50 @@ def end_log():
         return False
 
 def check_buttons(gps_data, lmst_val, moon_val, current_scr, prev_vals):
-    global last_green, last_red, logging_active, current_screen, last_screen_switch
+    global last_green, last_red, logging_active, current_screen, last_screen_switch, white_press_start
     
     green_state = white.value()
     red_state = black.value()
     button_pressed = False
     
     if green_state == 0 and last_green == 1:
+        white_press_start = time.time()
         time.sleep(debounce)
-        if logging_active:
-            if end_log():
-                oled.fill(0)
-                oled.text("End of log!", 25, 28, 1)
-                oled.show()
-                time.sleep(0.75)
-                redraw_screen(gps_data, lmst_val, current_scr, prev_vals)
-                button_pressed = True
+
+    if green_state == 1 and last_green == 0 and white_press_start is not None:
+        held = time.time() - white_press_start
+        white_press_start = None
+        if held >= 1.0:
+            if logging_active:
+                if end_log():
+                    oled.fill(0)
+                    oled.text("End of log!", 25, 28, 1)
+                    oled.show()
+                    time.sleep(0.75)
+                    redraw_screen(gps_data, lmst_val, current_scr, prev_vals)
+                    button_pressed = True
+            else:
+                if create_log_file(gps_data, lmst_val, moon_val):
+                    oled.fill(0)
+                    oled.text("Logged!", 35, 28, 1)
+                    oled.show()
+                    time.sleep(0.75)
+                    redraw_screen(gps_data, lmst_val, current_scr, prev_vals)
+                    button_pressed = True
+                else:
+                    oled.fill(0)
+                    oled.text("No GPS data!", 15, 28, 1)
+                    oled.show()
+                    time.sleep(0.75)
+                    redraw_screen(gps_data, lmst_val, current_scr, prev_vals)
+                    button_pressed = True
         else:
-            if create_log_file(gps_data, lmst_val, moon_val):
-                oled.fill(0)
-                oled.text("Logged!", 35, 28, 1)
-                oled.show()
-                time.sleep(0.75)
-                redraw_screen(gps_data, lmst_val, current_scr, prev_vals)
-                button_pressed = True
+            current_screen = current_screen - 1 if current_screen > 1 else 17
+            last_screen_switch = time.time()
+            redraw_screen(gps_data, lmst_val, current_screen, prev_vals)
+            button_pressed = True
     last_green = green_state
+    
     
     if red_state == 0 and last_red == 1:
         time.sleep(debounce)
@@ -1380,3 +1411,9 @@ while True:
     for i in range(5):
         check_buttons(gps_data, lmst, moon_phase, current_screen, prev_values)
         time.sleep(0.1)
+
+
+
+
+
+
